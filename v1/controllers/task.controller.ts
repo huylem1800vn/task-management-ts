@@ -25,7 +25,29 @@ export const index = async (req: Request, res: Response): Promise<void> => {
     };
     //Hết sắp xếp
 
-    const tasks = await Task.find(find).sort(sort); 
+    //Phân trang
+    const pagination = {
+        limit: 2,
+        page: 1,
+    };
+
+    if(req.query.page) {
+        // vì parseInt yêu cầu phải ở dạng chuỗi nên phải chuyển req.query.page sang chuỗi bằng cách thêm dấu `` và truyền ${}
+        pagination.page = parseInt(`${req.query.page}`);
+    }
+
+    if(req.query.limit) {
+        pagination.limit = parseInt(`${req.query.limit}`);
+    }
+
+    const skip = (pagination.page - 1) * pagination.limit;
+    //Hết phân trang
+
+    const tasks = await Task
+    .find(find)
+    .sort(sort)
+    .limit(pagination.limit)
+    .skip(skip);
 
     res.json(tasks);
 }
